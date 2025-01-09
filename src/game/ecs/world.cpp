@@ -8,6 +8,7 @@ namespace game::ecs {
 
         world->component<Position>();
         world->component<Velocity>();
+        world->component<Collision>();
     }
 
     void World::RegistrySystem() {
@@ -15,5 +16,13 @@ namespace game::ecs {
 
         world->system<Position, Velocity>().each(MovementSystem);
         world->system<Velocity>().each(VelocitySystem);
+        world->system<Position, Collision>("Render")
+                .each([&](flecs::entity e, Position& pos, Collision& col) {
+                    graphics->addRect({pos.x, pos.y}, {col.width, col.height}, true);
+                });
+    }
+
+    flecs::entity World::AddEntity(const std::string& name) {
+        return world->entity(name.c_str());
     }
 }
