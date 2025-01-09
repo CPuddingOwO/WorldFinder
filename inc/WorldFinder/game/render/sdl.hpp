@@ -25,8 +25,10 @@ namespace game::render::sdl {
         [[nodiscard]] SDL_Renderer* getRenderer() const { return renderer; };
 
         void onRender();
+        void setScale(float x, float y) { SDL_SetRenderScale(this->renderer, x, y); };
 
-        Graphics& addRect(const glm::ivec2& pos, const glm::ivec2& size, bool isCentered = false);
+        Graphics& addRect(const glm::ivec2& pos, const glm::ivec2& size, bool isCenterBottom = false);
+        Graphics& addPoint(const glm::ivec2& pos);
     private:
         static SDL_Window* createSDLWindow(const GraphicsOptions& op);
         static SDL_Renderer* createSDLRenderer(SDL_Window* wind, const GraphicsOptions& op);
