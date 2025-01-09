@@ -19,6 +19,7 @@ namespace game::ecs {
         world->system<Position, Collision>("Render")
                 .each([&](flecs::entity e, Position& pos, Collision& col) {
                     graphics->addRect({pos.x, pos.y}, {col.width, col.height}, true);
+                    graphics->addPoint({pos.x, pos.y});
                 });
     }
 
