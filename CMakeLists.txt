@@ -4,6 +4,8 @@ project(WorldFinder)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(SDL_STATIC ON)
+set(SDL_SHARED OFF)
 
 set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/install")
 
@@ -11,11 +13,14 @@ include(GNUInstallDirs)
 list(APPEND CMAKE_MODULE_PATH "${CatBirdRemake_SOURCE_DIR}/cmake")
 
 # add_subdirectory(...)
+ add_subdirectory(ext/sdl)
 # find_package(...)
 find_package(nlohmann_json)
 find_package(flecs)
 find_package(mini)
+find_package(glm)
 find_package(spdlog)
+find_package(opengl_system)
 
 set(SRC_CODE
         src/WorldFinder.cpp
@@ -25,6 +30,8 @@ set(SRC_CODE
         inc/WorldFinder/game/ecs/component.hpp
         src/game/ecs/world.cpp
         src/game/ecs/system.cpp
+        src/game/ecs/helper.cpp
+        src/game/render/sdl.cpp
 )
 
 list(APPEND ${CXX_MODULES}
@@ -47,9 +54,11 @@ target_include_directories(WorldFinder PUBLIC
 )
 
 target_link_libraries(WorldFinder PUBLIC
+        SDL3::SDL3-static
         nlohmann_json::nlohmann_json
         flecs::flecs_static
         mini::mini
+        glm::glm
         spdlog::spdlog
-
+        opengl::opengl
 )
