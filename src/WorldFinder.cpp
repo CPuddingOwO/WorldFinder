@@ -7,17 +7,20 @@
 
 using namespace WorldFinder;
 
-int main(int argc, char* argv[]) {
+int main([[maybe_unused]]int argc, [[maybe_unused]]char* argv[]) {
     spdlog::set_level(spdlog::level::trace);
     spdlog::set_pattern("%^[%H:%M:%S][%L] %v%$");
 
     auto options = AppOptions();
-    options.setWidth(16).setHeight(16).setIsRunning(true);
+    options.setTitle("World Finder")
+           .setWidth(720)
+           .setHeight(480)
+           .setIsRunning(true);
 
     auto injector = std::make_shared<di::DependencyInjector>();
 
-    auto ecs = std::make_shared<game::ecs::World>();
-    injector->RegisterDependency<game::ecs::World>(ecs);
+//    auto ecs = std::make_shared<game::ecs::World>();
+//    injector->RegisterDependency<game::ecs::World>(ecs);
 
     auto app = std::make_unique<App>(injector, options);
     app->run();
