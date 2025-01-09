@@ -24,6 +24,7 @@ namespace WorldFinder {
             op.size = {this->options.width, this->options.height};
             op.isBorderless = false;
             this->gfx = std::make_shared<render::sdl::Graphics>(inj, op);
+            gfx->setScale(3, 3);
         }
         { // Construct ecs world
             auto inj = std::make_shared<di::DependencyInjector>();
@@ -34,8 +35,8 @@ namespace WorldFinder {
 
         ecs->AddEntity("player")
             .set<game::ecs::component::Position>({0, 0, 0})
-            .set<game::ecs::component::Velocity>({5, 5})
-            .set<game::ecs::component::Collision>({5, 5});
+            .set<game::ecs::component::Velocity>({16, 16})
+            .set<game::ecs::component::Collision>({16, 16});
         return false;
     }
 
