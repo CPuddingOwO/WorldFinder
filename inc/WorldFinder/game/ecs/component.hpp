@@ -12,4 +12,9 @@ namespace game::ecs::component {
         double y; // ^ - v
         // No Z
     };
+
+    struct Collision {
+        double width;
+        double height;
+    };
 }
