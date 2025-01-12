@@ -36,8 +36,22 @@ void main() {
 }
 )";
 
-        this->window = createSDLWindow(options);
-        this->renderer = createSDLRenderer(this->window, options);
+        std::string fragmentShaderSource = R"(
+#version 330 core
+out vec4 FragColor;
+uniform vec4 color;
+void main() {
+    FragColor = color;
+}
+)";
+        this->shaderProgram_ = createShaderProgram(vertexShaderSource, fragmentShaderSource);
+        if (this->shaderProgram_ == 0) {
+            spdlog::error("Shader program creation failed!");
+        } else {
+            spdlog::debug("Shader program created successfully!");
+        }
+
+        glGenBuffers(1, &this->vertexBufferID_); // 生成一个缓冲区对象
     }
 
     Graphics::~Graphics() {
@@ -105,4 +119,76 @@ void main() {
         SDL_SetRenderDrawColor(this->renderer, 88, 129, 87, 255 );
         SDL_RenderClear(this->renderer);
     }
+    bool Graphics::checkShaderCompilation(GLuint shader) {
+        GLint success;
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+        if (!success) {
+            GLint logLength;
+            glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
+            std::string infoLog(logLength, ' ');
+            glGetShaderInfoLog(shader, logLength, &logLength, &infoLog[0]);
+            spdlog::error("Shader compilation failed: {}", infoLog); // TODO: Throw exception
+            return false;
+        }
+        spdlog::trace("Compilation successful for shader {}", shader);
+        return true;
+    }
+
+    bool Graphics::checkProgramLinking(GLuint program) {
+        GLint success;
+        glGetProgramiv(program, GL_LINK_STATUS, &success);
+        if (!success) {
+            GLint logLength;
+            glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
+            std::string infoLog(logLength, ' ');
+            glGetProgramInfoLog(program, logLength, &logLength, &infoLog[0]);
+            spdlog::error("Program linking failed: {}", infoLog); // TODO: Throw exception
+            return false;
+        }
+        spdlog::trace("Linking successful for shader program {}", program);
+        return true;
+    }
+
+    GLuint Graphics::createShaderProgram(const std::string& vertexShaderSource, const std::string& fragmentShaderSource) {
+        // Compile vertex shader
+        GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+        const char* vertexSource = vertexShaderSource.c_str();
+        glShaderSource(vertexShader, 1, &vertexSource, nullptr);
+        glCompileShader(vertexShader);
+        if (!checkShaderCompilation(vertexShader)) {
+            glDeleteShader(vertexShader);
+            return 0;
+        }
+
+        // Compile fragment shader
+        GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+        const char* fragmentSource = fragmentShaderSource.c_str();
+        glShaderSource(fragmentShader, 1, &fragmentSource, nullptr);
+        glCompileShader(fragmentShader);
+        if (!checkShaderCompilation(fragmentShader)) {
+            glDeleteShader(vertexShader);
+            glDeleteShader(fragmentShader);
+            return 0;
+        }
+
+        // Create program and link shaders
+        GLuint shaderProgram = glCreateProgram();
+        glAttachShader(shaderProgram, vertexShader);
+        glAttachShader(shaderProgram, fragmentShader);
+        glLinkProgram(shaderProgram);
+        if (!checkProgramLinking(shaderProgram)) {
+            glDeleteShader(vertexShader);
+            glDeleteShader(fragmentShader);
+            glDeleteProgram(shaderProgram);
+            return 0;
+        }
+
+        // Clean up individual shaders as they are no longer needed
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
+
+        // Return the created and linked shader program
+        return shaderProgram;
+    }
+
 }
