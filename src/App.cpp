@@ -37,7 +37,6 @@ namespace WorldFinder {
 
         ecs->AddEntity("player")
             .set<game::ecs::component::Position>({0, 0, 0})
-            .set<game::ecs::component::Velocity>({16, 16})
             .set<game::ecs::component::Velocity>({2, 2})
             .set<game::ecs::component::Collision>({16, 16});
         ecs->AddEntity("test1")
@@ -58,6 +57,24 @@ namespace WorldFinder {
                         this->options.isRunning = false;
                     if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(this->gfx->getWindow()))
                         this->options.isRunning = false;
+
+                    auto player = ecs->GetWorld().entity("player");
+                    if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_D) {
+                        auto vel = player.get<game::ecs::component::Velocity>();
+                        player.set<game::ecs::component::Velocity>({vel->x + 1, vel->y});
+                    }
+                    if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_A) {
+                        auto vel = player.get<game::ecs::component::Velocity>();
+                        player.set<game::ecs::component::Velocity>({vel->x - 1, vel->y});
+                    }
+                    if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_W) {
+                        auto vel = player.get<game::ecs::component::Velocity>();
+                        player.set<game::ecs::component::Velocity>({vel->x, vel->y - 1});
+                    }
+                    if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_S) {
+                        auto vel = player.get<game::ecs::component::Velocity>();
+                        player.set<game::ecs::component::Velocity>({vel->x, vel->y + 1});
+                    }
                 }
 
             }
