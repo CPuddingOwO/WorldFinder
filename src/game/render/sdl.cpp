@@ -1,8 +1,16 @@
+#include <glad/glad.h>
 #include <WorldFinder/game/render/sdl.hpp>
+#include <spdlog/spdlog.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace game::render::sdl {
     Graphics::Graphics(const std::shared_ptr<di::DependencyInjector>& injector, const GraphicsOptions& options) {
         this->options = options;
+        if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS)) {
+            throw std::runtime_error("Error: SDL_Init(): " + std::string(SDL_GetError()));
+        }
 
         this->window = createSDLWindow(options);
         this->renderer = createSDLRenderer(this->window, options);
