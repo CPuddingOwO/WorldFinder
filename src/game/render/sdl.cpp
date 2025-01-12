@@ -145,18 +145,100 @@ void main() {
         auto height = (float)size.y;
 
         if (isCenterBottom) {
-            rect.x -= (float)size.x / 2;
-            rect.y -= (float)size.y;
+            x -= width / 2.0f;
+            y -= height;
         }
-        SDL_SetRenderDrawColor(this->renderer, 255, 0, 0, 255);
-        SDL_RenderRect(this->renderer, &rect);
+
+        // 定义矩形的 4 个顶点
+        GLfloat vertices[] = {
+                x, y, 0.0f,                  // 左下角
+                x + width, y, 0.0f,          // 右下角
+                x + width, y + height, 0.0f, // 右上角
+                x, y + height, 0.0f          // 左上角
+        };
+
+        // 激活着色器程序
+        glUseProgram(this->shaderProgram_);
+
+        // 绑定顶点缓冲区
+        glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferID_);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+        // 启用顶点属性
+        GLuint posAttrib = glGetAttribLocation(this->shaderProgram_, "pos");
+        glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)nullptr);
+        glEnableVertexAttribArray(posAttrib);
+
+        // 设置投影矩阵
+        float left = 0.0f, right = (float)this->options_.size.x, bottom = (float)this->options_.size.y, top = 0.0f;
+        glm::mat4 projection = glm::ortho(left, right, bottom, top);
+        GLint projectionLoc = glGetUniformLocation(this->shaderProgram_, "projection");
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+        // 计算或获取模型矩阵
+        auto model = glm::mat4(1.0f); // 初始为单位矩阵
+        // 如果有平移、旋转或缩放，可以依次应用变换
+//        model = glm::translate(model, glm::vec3(1.0f, 2.0f, 0.0f)); // 例如平移
+//        model = glm::rotate(model, glm::radians(-5.0f), glm::vec3(0.0f, 0.0f, 1.0f)); // 旋转 -5 度
+        model = glm::scale(model, glm::vec3(this->options_.scale.x, this->options_.scale.y, 1.0f)); // 缩放
+
+        // 传递模型矩阵到着色器
+        GLint modelLoc = glGetUniformLocation(shaderProgram_, "model");
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model)); // 传递模型矩阵
+
+        // 设置颜色（这里你也可以通过 uniform 变量来设置颜色）
+        GLint colorLoc = glGetUniformLocation(this->shaderProgram_, "color");
+        glUniform4f(colorLoc, (float)color.r / 255.0f, (float)color.g / 255.0f, (float)color.b / 255.0f, (float)color.a / 255.0f); // 纯红色
+
+        // 绘制矩形（使用两个三角形）
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4); // 使用 GL_TRIANGLE_FAN 绘制矩形
+
         return *this;
     }
 
     Graphics &Graphics::addPoint(const glm::ivec2 &pos) {
-        SDL_SetRenderDrawColor(this->renderer, 0, 255, 0, 255);
-        SDL_RenderPoint(this->renderer, (float)pos.x, (float)pos.y);
+//        SDL_SetRenderDrawColor(this->renderer_, 0, 255, 0, 255);
+//        SDL_RenderPoint(this->renderer_, (float)pos.x, (float)pos.y);
+//        return *this;
+        // 将屏幕坐标转换为标准化设备坐标
+        //
+        float x = (2.0f * (float)pos.x) / (float)this->options_.size.x - 1.0f;
+        float y = 1.0f - (2.0f * (float)pos.y) / (float)this->options_.size.y;
+
+        // 创建一个包含点位置的顶点数组
+        GLfloat vertices[] = {
+                x, y, 0.0f // 点的坐标
+        };
+
+        // 激活着色器程序
+        glUseProgram(this->shaderProgram_);
+
+        // 绑定顶点缓冲区
+        glGenBuffers(1, &this->vertexBufferID_);
+        glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferID_);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+        // 启用顶点属性
+        GLuint posAttrib = glGetAttribLocation(this->shaderProgram_, "pos");
+        glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+        glEnableVertexAttribArray(posAttrib);
+
+        // 设置点的颜色（可以通过 Uniform 来设置颜色）
+        GLint colorLoc = glGetUniformLocation(this->shaderProgram_, "color");
+        glUniform4f(colorLoc, 0.0f, 0.0f, 1.0f, 1.0f); // 绿色
+
+        // 绘制点
+        glDrawArrays(GL_POINTS, 0, 1); // 使用 GL_POINTS 绘制单个点
+
         return *this;
+    }
+
+    Graphics &Graphics::addText(const std::string &text, const glm::ivec2 &pos) {
+        SDL_SetRenderDrawColor(this->renderer_, 0, 0, 255, 255);
+        // TODO: Implement Graphics::addText()
+        SDL_RenderDebugText(this->renderer_, (float)pos.x, (float)pos.y, text.c_str());
+        return *this;
+
     }
 
     void Graphics::onRender() {
