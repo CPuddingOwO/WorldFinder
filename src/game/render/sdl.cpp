@@ -55,8 +55,10 @@ void main() {
     }
 
     Graphics::~Graphics() {
-        destroySDLWindow(*this->window);
-        destroySDLRenderer(*this->renderer);
+        destroySDLWindow(*this->window_);
+        // destroySDLRenderer(*this->renderer); // Unused; Using OpenGL
+        destroySDLGLContext(this->glContext_);
+        SDL_Quit();
     }
 
     SDL_Window* Graphics::createSDLWindow(const GraphicsOptions& op) {
@@ -115,10 +117,15 @@ void main() {
     }
 
     void Graphics::onRender() {
-        SDL_RenderPresent(this->renderer);
-        SDL_SetRenderDrawColor(this->renderer, 88, 129, 87, 255 );
-        SDL_RenderClear(this->renderer);
+//        SDL_RenderPresent(this->renderer);
+//        SDL_SetRenderDrawColor(this->renderer, 88, 129, 87, 255 );
+//        SDL_RenderClear(this->renderer);
+        SDL_GL_SwapWindow(this->window_);
+
+        glClearColor(88.0f / 255.0f, 129.0f / 255.0f, 87.0f / 255.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
     }
+
     bool Graphics::checkShaderCompilation(GLuint shader) {
         GLint success;
         glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
