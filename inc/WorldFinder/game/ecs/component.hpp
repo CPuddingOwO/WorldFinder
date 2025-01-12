@@ -14,7 +14,7 @@ namespace game::ecs::component {
     };
 
     struct Collision {
-        double width;
-        double height;
+        double x;
+        double y;
     };
 }
