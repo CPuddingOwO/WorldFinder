@@ -63,6 +63,7 @@ void main() {
 
     SDL_Window* Graphics::createSDLWindow(const GraphicsOptions& op) {
         SDL_PropertiesID props = SDL_CreateProperties();
+        SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_OPENGL_BOOLEAN, true);
         SDL_SetStringProperty(props, SDL_PROP_WINDOW_CREATE_TITLE_STRING,
                               op.title.c_str());
         SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER,
