@@ -36,6 +36,8 @@ namespace WorldFinder {
     class App {
     private:
         AppOptions options;
+        std::shared_ptr<di::DependencyInjector> injector{};
+
         std::shared_ptr<game::ecs::World> ecs;
         std::shared_ptr<game::render::sdl::Graphics> gfx;
     public:
