@@ -23,7 +23,13 @@ int main([[maybe_unused]]int argc, [[maybe_unused]]char* argv[]) {
     auto fpsmanager = std::make_shared<game::render::FpsManager>(60.0f);
     injector->RegisterDependency<game::render::FpsManager>(fpsmanager);
 
-    auto app = std::make_unique<App>(injector, options);
-    app->run();
+    try {
+        auto app = std::make_unique<App>(injector, options);
+        app->run();
+
+    }catch(const std::exception& e) {
+        spdlog::error(e.what());
+    }
+
     return 0;
 }
