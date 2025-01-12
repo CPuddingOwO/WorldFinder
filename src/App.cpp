@@ -38,11 +38,11 @@ namespace WorldFinder {
         ecs->AddEntity("player")
             .set<game::ecs::component::Position>({64, 16, 0})
             .set<game::ecs::component::Velocity>({2, 2})
-            .set<game::ecs::component::Collision>({16, 16});
+            .set<game::ecs::component::Collision>({32, 32});
         ecs->AddEntity("test1")
             .set<game::ecs::component::Position>({32, 16, 0})
             .set<game::ecs::component::Velocity>({0, 0})
-            .set<game::ecs::component::Collision>({16, 16});
+            .set<game::ecs::component::Collision>({32, 32});
         return false;
     }
 
@@ -61,28 +61,33 @@ namespace WorldFinder {
                     auto player = ecs->GetWorld().entity("player");
                     if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_D) {
                         auto vel = player.get<game::ecs::component::Velocity>();
-                        player.set<game::ecs::component::Velocity>({vel->x + 0.5, vel->y});
+                        player.set<game::ecs::component::Velocity>({vel->x + 0.75, vel->y});
                     }
                     if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_A) {
                         auto vel = player.get<game::ecs::component::Velocity>();
-                        player.set<game::ecs::component::Velocity>({vel->x - 0.5, vel->y});
+                        player.set<game::ecs::component::Velocity>({vel->x - 0.75, vel->y});
                     }
                     if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_W) {
                         auto vel = player.get<game::ecs::component::Velocity>();
-                        player.set<game::ecs::component::Velocity>({vel->x, vel->y - 0.5});
+                        player.set<game::ecs::component::Velocity>({vel->x, vel->y - 0.75});
                     }
                     if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_S) {
                         auto vel = player.get<game::ecs::component::Velocity>();
-                        player.set<game::ecs::component::Velocity>({vel->x, vel->y + 0.5});
+                        player.set<game::ecs::component::Velocity>({vel->x, vel->y + 0.75});
                     }
                 }
 
             }
 
-//            gfx->addText(std::format("FPS: {}", injector->GetDependency<render::FpsManager>()->getDelta()), {10, 10});
-            gfx->onRender();
+            for (size_t i = 0; i < 32; i++) {
+                gfx->addRect({0, 8*i}, {256, 1}, {58, 90, 64, 255}, false); // 红色水平线段，起始位置 (10, 20)，长度 200
+                gfx->addRect({8*i, 0}, {1, 128+64}, {58, 90, 64, 255}, false); // 绿色垂直线段，起始位置 (20, 10)，长度 150
+            }
 
+//            gfx->addText(std::format("FPS: {}", injector->GetDependency<render::FpsManager>()->getDelta()), {10, 10});
             ecs->GetWorld().progress(15.0f);
+
+            gfx->onRender();
             injector->GetDependency<render::FpsManager>()->stop();
         }
         return false;
