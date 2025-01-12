@@ -1,6 +1,7 @@
 #include <WorldFinder/App.hpp>
 #include <spdlog/spdlog.h>
-#include "WorldFinder/game/render/sdl.hpp"
+#include <WorldFinder/game/render/sdl.hpp>
+#include <WorldFinder/game/render/fpsmanager.hpp>
 
 using namespace game;
 
@@ -43,6 +44,7 @@ namespace WorldFinder {
     bool App::run() {
         spdlog::info("Running app");
         while(options.isRunning) {
+            injector->GetDependency<render::FpsManager>()->start();
             {
                 SDL_Event event;
                 while (SDL_PollEvent(&event)) {
@@ -57,6 +59,7 @@ namespace WorldFinder {
             gfx->onRender();
 
             ecs->GetWorld().progress();
+            injector->GetDependency<render::FpsManager>()->stop();
         }
 
         return false;

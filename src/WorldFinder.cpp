@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <spdlog/spdlog.h>
+#include <WorldFinder/game/render/fpsmanager.hpp>
 
 
 using namespace WorldFinder;
@@ -19,8 +20,8 @@ int main([[maybe_unused]]int argc, [[maybe_unused]]char* argv[]) {
 
     auto injector = std::make_shared<di::DependencyInjector>();
 
-//    auto ecs = std::make_shared<game::ecs::World>();
-//    injector->RegisterDependency<game::ecs::World>(ecs);
+    auto fpsmanager = std::make_shared<game::render::FpsManager>(60.0f);
+    injector->RegisterDependency<game::render::FpsManager>(fpsmanager);
 
     auto app = std::make_unique<App>(injector, options);
     app->run();
