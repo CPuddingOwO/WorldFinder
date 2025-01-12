@@ -38,6 +38,11 @@ namespace WorldFinder {
         ecs->AddEntity("player")
             .set<game::ecs::component::Position>({0, 0, 0})
             .set<game::ecs::component::Velocity>({16, 16})
+            .set<game::ecs::component::Velocity>({2, 2})
+            .set<game::ecs::component::Collision>({16, 16});
+        ecs->AddEntity("test1")
+            .set<game::ecs::component::Position>({0, 0, 0})
+            .set<game::ecs::component::Velocity>({8, 8})
             .set<game::ecs::component::Collision>({16, 16});
         return false;
     }
