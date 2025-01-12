@@ -24,7 +24,7 @@ namespace WorldFinder {
             op.title = this->options.title;
             op.size = {this->options.width, this->options.height};
             op.isBorderless = false;
-            this->gfx = std::make_shared<render::sdl::Graphics>(inj, op);
+            op.isVsync = true;
             this->gfx = std::make_shared<render::sdl::Graphics>(nullptr, op);
             gfx->setScale(3, 3);
         }
