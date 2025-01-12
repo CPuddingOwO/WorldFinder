@@ -100,7 +100,14 @@ void main() {
         return rend;
     }
 
-    Graphics &Graphics::addRect(const glm::ivec2 &pos, const glm::ivec2 &size, bool isCenterBottom) {
+    SDL_GLContext Graphics::createSDLGLContext(SDL_Window *wind) {
+        auto ctx = SDL_GL_CreateContext(wind);
+        if (ctx == nullptr) {
+            throw std::runtime_error("Error: SDL_GL_CreateContext(): " + std::string(SDL_GetError()));
+        }
+        return ctx;
+    }
+
     Graphics &Graphics::setVSync(bool isVsync) {
         this->options_.isVsync = isVsync;
         SDL_GL_SetSwapInterval( isVsync ? 1 : 0);
