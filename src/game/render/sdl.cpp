@@ -124,7 +124,9 @@ void main() {
         this->options_.scale.x = x;
         this->options_.scale.y = y;
 
-        SDL_FRect rect = {(float)pos.x, (float)pos.y, (float)size.x, (float)size.y};
+        return *this;
+    }
+
     Graphics &Graphics::addRect(const glm::ivec2 &pos, const glm::ivec2 &size, const glm::ivec4& color, bool isCenterBottom) {
 
 //        SDL_FRect rect = {(float)pos.x, (float)pos.y, (float)size.x, (float)size.y};
