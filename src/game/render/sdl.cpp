@@ -86,8 +86,9 @@ void main() {
         return wind;
     }
 
-     SDL_Renderer* Graphics::createSDLRenderer(SDL_Window* wind, const GraphicsOptions& op) {
+    SDL_Renderer* Graphics::createSDLRenderer(SDL_Window* wind, const GraphicsOptions& op) {
          SDL_PropertiesID props = SDL_CreateProperties();
+         SDL_SetStringProperty(props, SDL_PROP_RENDERER_CREATE_NAME_STRING, "OpenGL");
          SDL_SetPointerProperty(props, SDL_PROP_RENDERER_CREATE_WINDOW_POINTER, wind);
          SDL_SetNumberProperty(props, SDL_PROP_RENDERER_CREATE_PRESENT_VSYNC_NUMBER,
                                op.isVsync ? 1 : 0);
