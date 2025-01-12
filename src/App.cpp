@@ -79,6 +79,7 @@ namespace WorldFinder {
 
             }
 
+//            gfx->addText(std::format("FPS: {}", injector->GetDependency<render::FpsManager>()->getDelta()), {10, 10});
             gfx->onRender();
 
             ecs->GetWorld().progress(15.0f);
