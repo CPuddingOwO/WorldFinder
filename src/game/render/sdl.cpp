@@ -101,6 +101,21 @@ void main() {
     }
 
     Graphics &Graphics::addRect(const glm::ivec2 &pos, const glm::ivec2 &size, bool isCenterBottom) {
+    Graphics &Graphics::setVSync(bool isVsync) {
+        this->options_.isVsync = isVsync;
+        SDL_GL_SetSwapInterval( isVsync ? 1 : 0);
+        return *this;
+    }
+
+    Graphics &Graphics::setBorderless(bool isBorderless) {
+        this->options_.isBorderless = isBorderless;
+        SDL_SetWindowBordered(this->window_, !isBorderless);
+        return *this;
+    }
+
+    Graphics& Graphics::setScale(float x, float y) {
+        this->options_.scale.x = x;
+        this->options_.scale.y = y;
 
         SDL_FRect rect = {(float)pos.x, (float)pos.y, (float)size.x, (float)size.y};
         if (isCenterBottom) {
