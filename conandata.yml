@@ -2,6 +2,7 @@
 # To keep your changes, remove these comment lines, but the plugin won't be able to modify your requirements
 
 requirements:
+  - "glad/0.1.36"
   - "glm/1.0.1"
   - "opengl/system"
   - "spdlog/1.14.1"
