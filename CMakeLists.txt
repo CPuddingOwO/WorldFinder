@@ -20,6 +20,7 @@ find_package(flecs)
 find_package(mini)
 find_package(glm)
 find_package(spdlog)
+find_package(glad)
 find_package(opengl_system)
 
 set(SRC_CODE
@@ -60,5 +61,6 @@ target_link_libraries(WorldFinder PUBLIC
         mini::mini
         glm::glm
         spdlog::spdlog
+        glad::glad
         opengl::opengl
 )
