@@ -85,7 +85,6 @@ namespace WorldFinder {
             ecs->GetWorld().progress(15.0f);
             injector->GetDependency<render::FpsManager>()->stop();
         }
-
         return false;
     }
 
