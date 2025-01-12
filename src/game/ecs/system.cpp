@@ -9,9 +9,11 @@ namespace game::ecs::system {
     }
 
     void VelocitySystem(Velocity& vel) {
-        double friction = 0.80;
-        if (vel.x < 0.0001) vel.x =0; else vel.x *= friction;
-        if (vel.y < 0.0001) vel.y = 0; else vel.y *= friction;
-//        if (vel.x != 0 && vel.y != 0) spdlog::trace("Velocity: ({}, {})", vel.x, vel.y);
+//        double friction = 0.80;
+        double friction = 0.95f;
+        double threshold = 0.00001;
+        if (std::abs(vel.x) < threshold ) vel.x = 0; else vel.x *= friction;
+        if (std::abs(vel.y) < threshold ) vel.y = 0; else vel.y *= friction;
+//        if (vel.x != 0 || vel.y != 0) spdlog::trace("Velocity: ({}, {})", vel.x, vel.y);
     }
 }
