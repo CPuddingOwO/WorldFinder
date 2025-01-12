@@ -7,7 +7,7 @@ using namespace game;
 
 namespace WorldFinder {
     App::App(const std::shared_ptr<di::DependencyInjector>& injector, const AppOptions& options) {
-//        this->injector = injector;
+        this->injector = injector;
         this->options = options;
 
         this->init();
@@ -58,7 +58,7 @@ namespace WorldFinder {
 
             gfx->onRender();
 
-            ecs->GetWorld().progress();
+            ecs->GetWorld().progress(15.0f);
             injector->GetDependency<render::FpsManager>()->stop();
         }
 
