@@ -7,10 +7,34 @@
 
 namespace game::render::sdl {
     Graphics::Graphics(const std::shared_ptr<di::DependencyInjector>& injector, const GraphicsOptions& options) {
-        this->options = options;
+        this->options_ = options;
         if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS)) {
             throw std::runtime_error("Error: SDL_Init(): " + std::string(SDL_GetError()));
         }
+
+        this->window_ = createSDLWindow(options);
+        this->renderer_ = nullptr; // Unused; Using OpenGL
+        // this->renderer = createSDLRenderer(this->window, options);
+        this->glContext_ = createSDLGLContext(this->window_);
+        SDL_GL_MakeCurrent(this->window_, this->glContext_);
+        setVSync(this->options_.isVsync);
+//        setBorderless(this->options_.isBorderless);
+        setBorderless(false);
+
+        if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
+            throw std::runtime_error("Failed to initialize OpenGL!");
+        }
+        glViewport(0, 0, this->options_.size.x, this->options_.size.y);
+
+        std::string vertexShaderSource = R"(
+#version 330 core
+layout(location = 0) in vec3 pos;
+uniform mat4 projection;
+uniform mat4 model;
+void main() {
+    gl_Position = projection * model * vec4(pos, 1.0);
+}
+)";
 
         this->window = createSDLWindow(options);
         this->renderer = createSDLRenderer(this->window, options);
