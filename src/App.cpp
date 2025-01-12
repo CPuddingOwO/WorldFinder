@@ -19,12 +19,13 @@ namespace WorldFinder {
         spdlog::info("Initializing app");
         spdlog::trace("w: {}, h: {}", options.width, options.height );
         { // Construct graphics
-            auto inj = std::make_shared<di::DependencyInjector>();
+//            auto inj = std::make_shared<di::DependencyInjector>();
             auto op = render::sdl::GraphicsOptions();
             op.title = this->options.title;
             op.size = {this->options.width, this->options.height};
             op.isBorderless = false;
             this->gfx = std::make_shared<render::sdl::Graphics>(inj, op);
+            this->gfx = std::make_shared<render::sdl::Graphics>(nullptr, op);
             gfx->setScale(3, 3);
         }
         { // Construct ecs world
