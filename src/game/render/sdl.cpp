@@ -125,6 +125,23 @@ void main() {
         this->options_.scale.y = y;
 
         SDL_FRect rect = {(float)pos.x, (float)pos.y, (float)size.x, (float)size.y};
+    Graphics &Graphics::addRect(const glm::ivec2 &pos, const glm::ivec2 &size, const glm::ivec4& color, bool isCenterBottom) {
+
+//        SDL_FRect rect = {(float)pos.x, (float)pos.y, (float)size.x, (float)size.y};
+//        if (isCenterBottom) {
+//            rect.x -= (float)size.x / 2;
+//            rect.y -= (float)size.y;
+//        }
+//        SDL_SetRenderDrawColor(this->renderer, 255, 0, 0, 255);
+//        SDL_RenderRect(this->renderer, &rect);
+//        return *this;
+
+        // 计算矩形的顶点位置
+        auto x = (float)pos.x;
+        auto y = (float)pos.y;
+        auto width = (float)size.x;
+        auto height = (float)size.y;
+
         if (isCenterBottom) {
             rect.x -= (float)size.x / 2;
             rect.y -= (float)size.y;
