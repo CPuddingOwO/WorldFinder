@@ -14,12 +14,15 @@ namespace game::ecs {
     void World::RegistrySystem() {
         using namespace game::ecs::system;
 
-        world->system<Position, Velocity>().each(MovementSystem);
         world->system<Velocity>().each(VelocitySystem);
-        world->system<Position, Collision>("Render")
-                .each([&](flecs::entity e, Position& pos, Collision& col) {
-                    graphics->addRect({pos.x, pos.y}, {col.width, col.height}, true);
-                    graphics->addPoint({pos.x, pos.y});
+        world->system<Position, Velocity>().each(MovementSystem);
+        world->system<Position, Collision, Velocity>("Render")
+                .each([&](flecs::entity e, Position& pos, Collision& col, Velocity& vel) {
+                      graphics->addRect({pos.x, pos.y}, {col.width, col.height}, {255, 0, 0, 255}, true);
+                      graphics->addRect({pos.x, pos.y}, {4, 4}, {255, 255, 0, 255}, true);
+//                    graphics->addText(std::format("ID: {}", e.name().c_str()), {pos.x-(col.width/2), pos.y-col.height-10});
+//                    graphics->addText(std::format("V: ({:.4f}, {:.4f})", vel.x, vel.y), {pos.x, pos.y});
+//                    graphics->addText(std::format("P: ({:.4f}, {:.4f})", pos.x, pos.y), {pos.x, pos.y+10});
                 });
     }
 
