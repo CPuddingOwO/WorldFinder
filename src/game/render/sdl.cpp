@@ -5,7 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-namespace game::render::sdl {
+namespace wf::game::render::sdl {
     Graphics::Graphics(const std::shared_ptr<di::DependencyInjector>& injector, const GraphicsOptions& options) {
         this->options_ = options;
         if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS)) {

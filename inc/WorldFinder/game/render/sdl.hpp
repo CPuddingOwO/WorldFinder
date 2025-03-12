@@ -5,7 +5,7 @@
 #include <string>
 #include "SDL3/SDL_opengl.h"
 
-namespace game::render::sdl {
+namespace wf::game::render::sdl {
     struct GraphicsOptions {
         std::string title = "Application";
         glm::ivec2 size = {680, 480};
