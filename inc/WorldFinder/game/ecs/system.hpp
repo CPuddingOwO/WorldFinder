@@ -2,9 +2,10 @@
 
 #include "component.hpp"
 
-namespace game::ecs::system {
+namespace wf::game::ecs::system {
     using namespace game::ecs::component;
 
-    void MovementSystem(Position& pos, Velocity& vel);
-    void VelocitySystem(Velocity& vel);
+    void RenderSystem(Transform& trs, Collision& col);
+    void PhysicsSystem(Transform& trs);
+    void InputSystem();
 }
