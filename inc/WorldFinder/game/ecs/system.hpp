@@ -5,7 +5,10 @@
 namespace wf::game::ecs::system {
     using namespace game::ecs::component;
 
-    void RenderSystem(Transform& trs, Collision& col);
-    void PhysicsSystem(Transform& trs);
-    void InputSystem();
+    void InputSystem(flecs::entity e, Velocity& vel);
+    void AccelerateSystem(Velocity& vel, const Acceleration& acc);
+    void DragSystem(Velocity& vel, const Drag& drag);
+    void MovementSystem(Position& pos, Velocity& vel);
+
+    void RenderSystem(flecs::entity e,const Position& pos, const Sprite& sprite);
 }

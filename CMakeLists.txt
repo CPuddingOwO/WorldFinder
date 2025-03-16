@@ -42,6 +42,7 @@ set(SRC_CODE
         src/game/scene/DefaultScene.cpp
         inc/WorldFinder/game/Game.hpp
         src/game/Game.cpp
+        inc/WorldFinder/Input.hpp
 )
 
 list(APPEND ${CXX_MODULES}

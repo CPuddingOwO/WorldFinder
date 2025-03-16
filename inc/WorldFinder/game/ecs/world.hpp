@@ -2,10 +2,7 @@
 
 #include <flecs.h>
 #include <memory>
-#include <unordered_map>
 #include <string>
-#include "component.hpp"
-#include "system.hpp"
 #include <WorldFinder/di/DependencyInjector.hpp>
 #include <WorldFinder/game/render/sdl.hpp>
 
@@ -24,19 +21,21 @@ namespace wf::game::ecs {
         World(std::shared_ptr<di::DependencyInjector>& injector, const WorldOptions& options) {
             this->options = options;
             this->injector = injector;
-            graphics = injector->GetDependency<Graphics>();
+            this->graphics = injector->GetDependency<Graphics>();
             this->world = std::make_unique<flecs::world>();
-            this->world->set_ctx(graphics.get());
+
+            this->world->set_ctx(this->injector.get()); // 直接注入依赖
+
             RegistryComponent();
             RegistryQuery();
             RegistrySystem();
         }
 
-        bool Update(float dt = 0) {
-            return  GetWorld().progress(dt);
+        bool Update(float dt = 20) {
+            return  GetWorld().progress();
         }
 
-        flecs::world& GetWorld() { return *world; }
+        [[nodiscard]] flecs::world& GetWorld() const { return *world; }
         ~World() = default;
 
         flecs::entity AddEntity(const std::string& name);
