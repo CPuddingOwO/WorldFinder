@@ -234,9 +234,10 @@ void main() {
     }
 
     Graphics &Graphics::addText(const std::string &text, const glm::ivec2 &pos) {
-        SDL_SetRenderDrawColor(this->renderer_, 0, 0, 255, 255);
+
+        // SDL_SetRenderDrawColor(this->renderer_, 0, 0, 255, 255);
         // TODO: Implement Graphics::addText()
-        SDL_RenderDebugText(this->renderer_, (float)pos.x, (float)pos.y, text.c_str());
+        // SDL_RenderDebugText(this->renderer_, (float)pos.x, (float)pos.y, text.c_str());
         return *this;
 
     }
