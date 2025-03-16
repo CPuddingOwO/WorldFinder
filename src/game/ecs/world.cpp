@@ -11,19 +11,23 @@ namespace wf::game::ecs {
     void World::RegistryComponent() const {
         using namespace game::ecs::component;
 
-        world->component<Transform>();
-        world->component<Collision>();
-        world->component<Physical>();
+        world->component<Position>();
+        world->component<Velocity>();
+        world->component<Acceleration>();
+        world->component<Drag>();
     }
 
     void World::RegistrySystem() {
         using namespace game::ecs::system;
-        // world->system<Position, Collision, Velocity>("Render")
-        //         .each([&](flecs::entity e, Position& pos, Collision& col, Velocity& vel) {
+        // world->system<Position>("Position")
+        //         .each([&](flecs::entity e, Position& pos) {
         //
         //         });
-        world->system<Transform, Collision>("RenderSystem").kind(flecs::OnUpdate).each(RenderSystem);
-        world->system<Transform>("PhysicsSystem").each(PhysicsSystem);
+        world->system<Velocity>().kind(flecs::OnUpdate).each(InputSystem);
+        world->system<Velocity, const Acceleration>("AccelerationSystem").kind(flecs::OnUpdate).each(AccelerateSystem);
+        world->system<Velocity, const Drag>("DragSystem").kind(flecs::OnUpdate).each(DragSystem);
+        world->system<Position, Velocity>("MovementSystem").kind(flecs::OnUpdate).each(MovementSystem);
+        world->system<const Position, const Sprite>("RenderSystem").kind(flecs::OnUpdate).each(RenderSystem);
     }
 
     flecs::entity World::AddEntity(const std::string& name) {
