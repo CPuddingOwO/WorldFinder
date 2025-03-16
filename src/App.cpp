@@ -22,6 +22,9 @@ namespace wf {
     bool App::init() {
         spdlog::info("Initializing app");
         spdlog::trace("w: {}, h: {}", options.width, options.height );
+        {   // 初始化 KeyboardStats 实例
+            keyboard_stats = std::make_shared<input::KeyboardStats>();
+        }
         {   // 构造 Graphics: gfx 图形类
             auto op = sdl::GraphicsOptions();
             op.title = this->options.title;
@@ -32,12 +35,16 @@ namespace wf {
             gfx->setScale(3, 3);
         }
         {   // 构造 Game 实例
-            // 并 注入 Graphics: gfx 到 Game 实例中
+            // 注入 Graphics: gfx 到 Game 实例中
+            // 注入 KeyboardStats: keyboard_stats 到 Game
             auto inj = std::make_shared<di::DependencyInjector>();
             inj->RegisterDependency<sdl::Graphics>(this->gfx);
+            inj->RegisterDependency<input::KeyboardStats>(keyboard_stats);
             auto op = game::GameOptions();
             game = std::make_shared<game::Game>(inj, op);
         }
+
+        this->game->Initialize();
         return false;
     }
 
@@ -54,26 +61,18 @@ namespace wf {
                         this->options.isRunning = false;
                 }
 
-                auto player = injector->GetDependency<game::entity::Player>();
-                auto state = SDL_GetKeyboardState(nullptr);
-                if (state[SDL_SCANCODE_D])      { player->go_right(); }
-                if (state[SDL_SCANCODE_A])      { player->go_left(); }
-                if (state[SDL_SCANCODE_SPACE])  { player->jump(); }
+                const auto state = SDL_GetKeyboardState(nullptr);
+                memcpy(keyboard_stats->keys.data(), state, SDL_SCANCODE_COUNT);
+                // for (size_t i = 0; i < SDL_SCANCODE_COUNT; i++) {
+                    // keyboard_stats->keys.at(i) = state[i];
+                // }
+                // if (state[SDL_SCANCODE_D])      { player->go_right(); }
+                // if (state[SDL_SCANCODE_A])      { player->go_left(); }
+                // if (state[SDL_SCANCODE_SPACE])  { player->jump(); }
 
             }
-            auto player = injector->GetDependency<game::entity::Player>();
-
-//            for (size_t i = 0; i < 32; i++) {
-//                gfx->addRect({0, 8*i}, {256, 1}, {58, 90, 64, 255}, false); // 红色水平线段，起始位置 (10, 20)，长度 200
-//                gfx->addRect({8*i, 0}, {1, 128+64}, {58, 90, 64, 255}, false); // 绿色垂直线段，起始位置 (20, 10)，长度 150
-//            }
-            // gfx->addRect({0, 128}, {720, 1}, {58, 90, 64, 255}, false); // 红色水平线段，起始位置 (10, 20)，长度 200
-
-//            gfx->addText(std::format("FPS: {}", injector->GetDependency<render::FpsManager>()->getDelta()), {10, 10});
-
             this->game->Update();
-
-            gfx->onRender();
+            this->game->Render();
             injector->GetDependency<FpsManager>()->stop();
         }
         return false;
