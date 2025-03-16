@@ -1,33 +1,47 @@
-#include <flecs/addons/cpp/entity.hpp>
-#include <flecs/addons/cpp/iter.hpp>
+#include <flecs.h>
 #include <WorldFinder/game/ecs/system.hpp>
 #include <spdlog/spdlog.h>
 
+#include "WorldFinder/Input.hpp"
+
 namespace wf::game::ecs::system {
-    void PhysicsSystem(Transform& trs) {
-        double friction = 0.90f;
-        //        double friction = 0.80f;
-        //        double friction = 0.95f;
-        double threshold = 0.00001;
-        if (std::abs(trs.vel.x) < threshold ) trs.vel.x = 0; else trs.vel.x *= friction;
-        if (std::abs(trs.vel.y) < threshold ) trs.vel.y = 0; else trs.vel.y *= friction;
-        //        if (vel.x != 0 || vel.y != 0) spdlog::trace("Velocity: ({}, {})", vel.x, vel.y);
-        if (trs.vel.x != 0) trs.pos.x += trs.vel.x;
-        if (trs.vel.y != 0) trs.pos.y += trs.vel.y;
-//        if (vel.x != 0 && vel.y != 0) spdlog::trace("Position: ({}, {}, {})", pos.x, pos.y, pos.z);
+    void AccelerateSystem(Velocity& vel, const Acceleration& acc) {
+        // if (vel.x != 0) vel.x += acc.x;
+        // if (vel.y != 0) vel.y += acc.y;
     }
 
-    void RenderSystem(flecs::entity e, flecs::iter& it, Transform& trs, Collision& col) {
-        auto* graphics = static_cast<render::sdl::Graphics*>(it.world().get_context());
-        graphics->addRect({trs.pos.x, trs.pos.y}, {col.x, col.y}, {52, 78, 65, 255}, true);
-        graphics->addRect({trs.pos.x, trs.pos.y}, {4, 4}, {255, 255, 0, 255}, true);
-        graphics->addText(std::format("ID: {}", e.name().c_str()), {trs.pos.x-(col.x/2), trs.pos.y-col.y-10});
-        graphics->addText(std::format("V: ({:.4f}, {:.4f})", trs.vel.x, trs.vel.y), {trs.pos.x, trs.pos.y});
-        graphics->addText(std::format("P: ({:.4f}, {:.4f})", trs.pos.x, trs.pos.y), {trs.pos.x, trs.pos.y+10});
+    void DragSystem(Velocity& vel, const Drag& drag) {
+        double threshold = 0.05;
+
+        if (std::abs(vel.x) < threshold ) vel.x = 0; else vel.x *= drag.value;
+        if (std::abs(vel.y) < threshold ) vel.y = 0; else vel.y *= drag.value;
     }
 
-    void InputSystem() {
+    void MovementSystem(Position& pos, Velocity& vel) {
+        if (vel.x != 0) pos.x += vel.x;
+        if (vel.y != 0) pos.y += vel.y;
+        // if (vel.x != 0 && vel.y != 0) spdlog::trace("Position: ({}, {}, {})", pos.x, pos.y, pos.z);
+    }
 
+    void RenderSystem(flecs::entity e,const Position& pos, const Sprite& sprite) {
+        // auto* graphics = static_cast<render::sdl::Graphics*>(e.world().get_ctx());
+        const auto* injector = static_cast<di::DependencyInjector*>(e.world().get_ctx());
+        const auto graphics = injector->GetDependency<render::sdl::Graphics>();
+        graphics->addRect({pos.x, pos.y}, {sprite.size.x, sprite.size.y}, {52, 78, 65, 255}, true);
+        graphics->addRect({pos.x, pos.y}, {4, 4}, {255, 255, 0, 255}, true);
+        // graphics->addText(std::format("ID: {}", e.name().c_str()), {pos.x-(sprite.size.x/2), pos.y-col.y-10});
+        // graphics->addText(std::format("V: ({:.4f}, {:.4f})", vel.x, vel.y), {pos.x, pos.y});
+        // graphics->addText(std::format("P: ({:.4f}, {:.4f})", pos.x, pos.y), {pos.x, pos.y+10});
+    }
+
+    void InputSystem(flecs::entity e, Velocity& vel) {
+        const auto* injector = static_cast<di::DependencyInjector*>(e.world().get_ctx());
+        const auto input = injector->GetDependency<input::KeyboardStats>();
+
+        if (input->is_pressed(input::key::W)) vel.y -= 0.2f;
+        if (input->is_pressed(input::key::S)) vel.y += 0.2f;
+        if (input->is_pressed(input::key::A)) vel.x -= 0.2f;
+        if (input->is_pressed(input::key::D)) vel.x += 0.2f;
     }
 
 }
