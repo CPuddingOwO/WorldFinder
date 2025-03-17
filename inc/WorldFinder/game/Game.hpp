@@ -21,6 +21,7 @@ namespace wf::game {
     };
 
     struct GameOptions {
+        glm::vec<2, int> screen_size = {};
         GameState state = GameState::Null;
         Scene *scene = nullptr;
     };
