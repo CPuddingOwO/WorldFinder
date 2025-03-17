@@ -32,7 +32,7 @@ namespace wf {
             op.isBorderless = false;
             op.isVsync = true;
             this->gfx = std::make_shared<sdl::Graphics>(nullptr, op);
-            gfx->setScale(3, 3);
+            gfx->setScale(1, 1);
         }
         {   // 构造 Game 实例
             // 注入 Graphics: gfx 到 Game 实例中
@@ -41,6 +41,7 @@ namespace wf {
             inj->RegisterDependency<sdl::Graphics>(this->gfx);
             inj->RegisterDependency<input::KeyboardStats>(keyboard_stats);
             auto op = game::GameOptions();
+            op.screen_size = {options.width, options.height};
             game = std::make_shared<game::Game>(inj, op);
         }
 
