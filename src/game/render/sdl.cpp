@@ -1,9 +1,12 @@
+#include <fstream>
 #include <glad/glad.h>
 #include <WorldFinder/game/render/sdl.hpp>
 #include <spdlog/spdlog.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 namespace wf::game::render::sdl {
     Graphics::Graphics(const std::shared_ptr<di::DependencyInjector>& injector, const GraphicsOptions& options) {
@@ -52,6 +55,8 @@ void main() {
         }
 
         glGenBuffers(1, &this->vertexBufferID_); // 生成一个缓冲区对象
+
+        this->font_texture_ = loadFontTexture("./font.png");
     }
 
     Graphics::~Graphics() {
@@ -233,11 +238,122 @@ void main() {
         return *this;
     }
 
-    Graphics &Graphics::addText(const std::string &text, const glm::ivec2 &pos) {
+    Graphics &Graphics::addText(const std::string &text, const glm::ivec2 &pos, const glm::ivec4 &color, const bool isCenterBottom) {
 
         // SDL_SetRenderDrawColor(this->renderer_, 0, 0, 255, 255);
         // TODO: Implement Graphics::addText()
         // SDL_RenderDebugText(this->renderer_, (float)pos.x, (float)pos.y, text.c_str());
+
+        // 激活着色器程序
+    glUseProgram(this->shaderProgram_);
+
+    // 绑定字体纹理（假设已通过其他方式加载）
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, this->font_texture_); // 需要提前加载字体纹理
+
+    // 设置纹理 uniform
+    GLint texUniform = glGetUniformLocation(this->shaderProgram_, "textureSampler");
+    glUniform1i(texUniform, 0);
+
+    // 设置颜色 uniform（用于颜色调制）
+    GLint colorLoc = glGetUniformLocation(this->shaderProgram_, "color");
+    glUniform4f(colorLoc,
+        static_cast<float>(color.r)/255.0f,
+        static_cast<float>(color.g)/255.0f,
+        static_cast<float>(color.b)/255.0f,
+        static_cast<float>(color.a)/255.0f
+    );
+
+    // 设置投影矩阵（同 addRect）
+    float left = 0.0f;
+    float right = static_cast<float>(this->options_.size.x);
+    float bottom = static_cast<float>(this->options_.size.y);
+    float top = 0.0f;
+    glm::mat4 projection = glm::ortho(left, right, bottom, top);
+    GLint projectionLoc = glGetUniformLocation(this->shaderProgram_, "projection");
+    glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+    // 设置模型矩阵（同 addRect）
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::scale(model, glm::vec3(this->options_.scale.x, this->options_.scale.y, 1.0f));
+    GLint modelLoc = glGetUniformLocation(this->shaderProgram_, "model");
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+    // 计算初始位置（考虑居中底部对齐）
+    float baseX = static_cast<float>(pos.x);
+    float baseY = static_cast<float>(pos.y);
+    if (isCenterBottom) {
+        // 计算文本总宽度（假设字符逻辑宽度为1，实际尺寸由 scale 控制）
+        float totalWidth = text.length() * this->options_.scale.x;
+        baseX -= totalWidth / 2.0f;
+        baseY -= this->options_.scale.y; // 字符逻辑高度为1
+    }
+
+    // 字符尺寸（逻辑单位，实际尺寸由 model 矩阵的 scale 控制）
+    const float CHAR_WIDTH = 1.0f;
+    const float CHAR_HEIGHT = 1.0f;
+    float cursorX = baseX;
+    float cursorY = baseY;
+
+    // 遍历每个字符
+    for (char c : text) {
+        // 跳过非打印字符（ASCII 32~127）
+        if (c < 32 || c > 127) {
+            cursorX += CHAR_WIDTH; // 保持间距一致
+            continue;
+        }
+
+        // 计算 UV 坐标（16x16 网格）
+        const int ASCII_START = 32;
+        int asciiIndex = static_cast<int>(c) - ASCII_START;
+        int col = asciiIndex % 16;
+        int row = 15 - (asciiIndex / 16); // 翻转行号（假设纹理原点在左下）
+
+        float uStep = 1.0f / 16.0f;
+        float vStep = 1.0f / 16.0f;
+
+        float uStart = col * uStep;
+        float uEnd = (col + 1) * uStep;
+        float vStart = row * vStep;
+        float vEnd = (row + 1) * vStep;
+
+        // 顶点数据（位置 + UV）
+        GLfloat vertices[] = {
+            // 位置          UV
+            cursorX,          cursorY,          0.0f, uStart, vEnd,   // 左下
+            cursorX + CHAR_WIDTH, cursorY,          0.0f, uEnd,   vEnd,   // 右下
+            cursorX + CHAR_WIDTH, cursorY + CHAR_HEIGHT, 0.0f, uEnd,   vStart, // 右上
+            cursorX,          cursorY + CHAR_HEIGHT, 0.0f, uStart, vStart  // 左上
+        };
+
+        // 更新顶点缓冲区
+        glBindBuffer(GL_ARRAY_BUFFER, this->vertexBufferID_);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+        // 设置顶点属性
+        // 位置属性
+        GLuint posAttrib = glGetAttribLocation(this->shaderProgram_, "pos");
+        glEnableVertexAttribArray(posAttrib);
+        glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)0);
+
+        // 纹理坐标属性
+        GLuint texAttrib = glGetAttribLocation(this->shaderProgram_, "texCoord");
+        glEnableVertexAttribArray(texAttrib);
+        glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+
+        // 绘制字符
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+        // 移动光标到下一个字符位置
+        cursorX += CHAR_WIDTH;
+    }
+
+    // 清理状态
+    glDisableVertexAttribArray(glGetAttribLocation(this->shaderProgram_, "pos"));
+    glDisableVertexAttribArray(glGetAttribLocation(this->shaderProgram_, "texCoord"));
+
+    return *this;
+
         return *this;
 
     }
@@ -323,5 +439,29 @@ void main() {
         // Return the created and linked shader program
         return shaderProgram;
     }
+    GLuint Graphics::loadFontTexture(const std::string& fontPath) {
+        // TODO: Load font texture
+        int width, height, channels;
+        unsigned char* data = stbi_load(fontPath.c_str(), &width, &height, &channels, 0);
+        if (!data) {
+            spdlog::error("Failed to load font texture: {}", fontPath);
+            return 0;
+        }
 
+        GLuint fontTexture;
+        glGenTextures(1, &fontTexture);
+        glBindTexture(GL_TEXTURE_2D, fontTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+
+        stbi_image_free(data);
+
+        return fontTexture;
+    }
 }

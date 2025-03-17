@@ -24,6 +24,9 @@ namespace wf::game::render::sdl {
         GLuint shaderProgram_{};  // 着色器程序
         GLuint vertexArrayID_{};  // 顶点数组对象
         GLuint vertexBufferID_{}; // 顶点缓冲区对象
+
+        GLuint font_texture_{};
+        // GLuint font_shader_program_{};
     public:
         Graphics(const std::shared_ptr<di::DependencyInjector>& injector , const GraphicsOptions& options);
         ~Graphics();
@@ -40,7 +43,7 @@ namespace wf::game::render::sdl {
 
         Graphics& addRect(const glm::ivec2& pos, const glm::ivec2& size, const glm::ivec4& color, bool isCenterBottom = false);
         Graphics& addPoint(const glm::ivec2& pos);
-        Graphics& addText(const std::string& text, const glm::ivec2& pos);
+        Graphics& addText(const std::string& text, const glm::ivec2& pos, const glm::ivec4 &color, bool isCenterBottom);
     private:
         static SDL_Window* createSDLWindow(const GraphicsOptions& op);
         static void destroySDLWindow(SDL_Window& wind) { SDL_DestroyWindow(&wind); };
@@ -54,5 +57,6 @@ namespace wf::game::render::sdl {
         bool checkShaderCompilation(GLuint shader);
         bool checkProgramLinking(GLuint program);
         GLuint createShaderProgram(const std::string& vertexShaderSource, const std::string& fragmentShaderSource);
+        GLuint loadFontTexture(const std::string& fontPath);
     };
 }
