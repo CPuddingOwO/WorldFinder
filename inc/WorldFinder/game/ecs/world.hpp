@@ -38,13 +38,13 @@ namespace wf::game::ecs {
         [[nodiscard]] flecs::world& GetWorld() const { return *world; }
         ~World() = default;
 
-        flecs::entity AddEntity(const std::string& name);
+        flecs::entity AddEntity(const std::string& name) const;
 
     private:
         void RegistryComponent() const;
-        void RegistrySystem();
-
-        static void RegistryQuery();
+        void RegistrySystem() const;
+        void RegistryQuery() const;
+        // void RegisterObserver();
 
         std::unique_ptr<flecs::world> world;
     };
