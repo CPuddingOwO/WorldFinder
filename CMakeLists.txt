@@ -17,6 +17,7 @@ list(APPEND CMAKE_MODULE_PATH "${CatBirdRemake_SOURCE_DIR}/cmake")
 # add_subdirectory(...)
 add_subdirectory(ext/sdl)
 # find_package(...)
+find_package(stb)
 find_package(nlohmann_json)
 find_package(flecs)
 find_package(mini)
@@ -64,6 +65,7 @@ target_include_directories(WorldFinder PUBLIC
 )
 
 target_link_libraries(WorldFinder PUBLIC
+        stb::stb                        # IMAGE LIB
         SDL3::SDL3-static               # GRAPHICS LIB
         nlohmann_json::nlohmann_json    # JSON LIB
         flecs::flecs_static             # ECS SYSTEM
