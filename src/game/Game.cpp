@@ -28,10 +28,14 @@ namespace wf::game {
         {
             // 初始化玩家
             auto player = ecs->AddEntity("Player")
-                 .set<component::Sprite>({{16, 16}})
-                 .set<component::Position>({0, 32})
-                 .set<component::Velocity>({3, 0})
-                 .set<component::Drag>({0.90});
+                 .set<component::Sprite>({{16*3, 16*3}})
+                 .set<component::Position>({32, 32})
+                 .set<component::Velocity>({{2, 0}, {6, 6}})
+                 .set<component::ImpulseAcceleration>({0, 0})
+                 .set<component::ContinuousAcceleration>({0, 0})
+                 .set<component::Drag>({0.95})
+                 .set<component::Mass>({2})
+                 .set<component::Gravity>({0.05});
             auto p = std::make_shared<entity::Player>(player);
             this->injector->RegisterDependency<entity::Player>(p);
 
@@ -45,12 +49,39 @@ namespace wf::game {
     }
 
     Result Game::Update() { // 暂不考虑 Const
-        ecs->Update(); // 更新ecs
+        ecs->Update(1); // 更新ecs
         return Result();
     }
 
 
     Result Game::Render() {
+        {
+            // 绘制网格
+            short blod_grid_spacing = 0;
+            constexpr int reg_grid_spacing = 32;
+            const glm::vec<2, int> grid_size = {options.screen_size.x/reg_grid_spacing, options.screen_size.y/reg_grid_spacing};
+            for (int i = 0; i < grid_size.x; i+= 1) { // 绘制横向网格
+                if (blod_grid_spacing == 5) {
+                    gfx->addRect({0+i*reg_grid_spacing-1, 0}, {3, options.screen_size.y}, {0, 0, 0, 255}, false);
+                    blod_grid_spacing = 0;
+                } else {
+                    gfx->addRect({0+i*reg_grid_spacing, 0}, {1, options.screen_size.y}, {0, 0, 0, 255}, false);
+                }
+                blod_grid_spacing +=1;
+            }
+            blod_grid_spacing = 0;
+            for (int i = 0; i < grid_size.y; i+= 1) {
+                if (blod_grid_spacing == 5) { // 绘制纵向网格
+                    gfx->addRect({0, 0+i*reg_grid_spacing-1}, {options.screen_size.x, 3}, {0, 0, 0, 255}, false);
+                    blod_grid_spacing = 0;
+                } else {
+                    gfx->addRect({0, 0+i*reg_grid_spacing}, {options.screen_size.x, 1}, {0, 0, 0, 255}, false);
+                }
+                blod_grid_spacing +=1;
+            }
+            gfx->addRect({0, 256-1}, {options.screen_size.x, 3}, {128, 0, 0, 255}, false);
+        }
+
         // 将缓冲区的数据渲染到屏幕
         gfx->onRender();
         return Result();
