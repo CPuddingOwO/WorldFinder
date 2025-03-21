@@ -35,12 +35,13 @@ namespace wf::game::ecs::system {
     void RenderSystem(flecs::entity e,const Position& pos, const Sprite& sprite) {
         // auto* graphics = static_cast<render::sdl::Graphics*>(e.world().get_ctx());
         const auto* injector = static_cast<di::DependencyInjector*>(e.world().get_ctx());
-        const auto graphics = injector->GetDependency<render::sdl::Graphics>();
-        graphics->addRect({pos.x, pos.y}, {sprite.size.x, sprite.size.y}, {52, 78, 65, 255}, true);
-        graphics->addRect({pos.x, pos.y}, {4, 4}, {255, 255, 0, 255}, true);
+        const auto graphics = injector->GetDependency<render::gfx::Graphics>();
+        graphics->addRect({pos.x, pos.y}, {sprite.size.x, sprite.size.y}, {52, 78, 65, 255}, true, true);
+        graphics->addRect({pos.x, pos.y}, {4, 4}, {255, 255, 0, 255}, true, true);
         // graphics->addText(std::format("ID: {}", e.name().c_str()), {pos.x-(sprite.size.x/2), pos.y-sprite.size.y-10});
         // graphics->addText(std::format("V: ({:.4f}, {:.4f})", vel.cur.x, vel.cur.y), {pos.x, pos.y});
         // graphics->addText(std::format("P: ({:.4f}, {:.4f})", pos.x, pos.y), {pos.x, pos.y+10}, {255, 255, 255, 255}, true);
+        graphics->submit();
     }
 
     void InputSystem(flecs::entity e, ImpulseAcceleration& i_acc) {

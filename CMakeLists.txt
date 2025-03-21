@@ -35,7 +35,7 @@ set(SRC_CODE
         src/game/ecs/world.cpp
         src/game/ecs/system.cpp
         src/game/ecs/helper.cpp
-        src/game/render/sdl.cpp
+        src/game/render/graphics.cpp
         src/game/entity/Player.cpp
         inc/WorldFinder/game/scene/Scene.hpp
         inc/WorldFinder/Error.hpp
@@ -44,6 +44,15 @@ set(SRC_CODE
         inc/WorldFinder/game/Game.hpp
         src/game/Game.cpp
         inc/WorldFinder/Input.hpp
+        inc/WorldFinder/game/render/adapter.hpp
+        inc/WorldFinder/game/render/adapter/SDLRendererAdapter.hpp
+        src/game/render/adapter/SDLRendererAdapter.cpp
+        inc/WorldFinder/game/render/adapter/OpenGLRendererAdapter.hpp
+        src/game/render/adapter/OpenGLRendererAdapter.cpp
+        inc/WorldFinder/game/render/drawlist.hpp
+        src/game/render/drawlist.cpp
+        inc/WorldFinder/game/render/types.hpp
+        inc/WorldFinder/game/render/graphics.hpp
 )
 
 list(APPEND ${CXX_MODULES}
