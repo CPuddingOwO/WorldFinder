@@ -1,5 +1,5 @@
 #pragma once
-#include <WorldFinder/game/render/sdl.hpp>
+#include <WorldFinder/game/render/graphics.hpp>
 
 namespace wf::game::ecs::component {
 
