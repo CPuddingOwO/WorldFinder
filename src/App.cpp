@@ -1,6 +1,6 @@
 #include <WorldFinder/App.hpp>
 #include <spdlog/spdlog.h>
-#include <WorldFinder/game/render/sdl.hpp>
+#include <WorldFinder/game/render/graphics.hpp>
 #include <WorldFinder/game/render/fpsmanager.hpp>
 
 #include <WorldFinder/game/entity/Player.hpp>
@@ -26,19 +26,19 @@ namespace wf {
             keyboard_stats = std::make_shared<input::KeyboardStats>();
         }
         {   // 构造 Graphics: gfx 图形类
-            auto op = sdl::GraphicsOptions();
+            auto op = gfx::GraphicsOptions();
             op.title = this->options.title;
             op.size = {this->options.width, this->options.height};
             op.isBorderless = false;
             op.isVsync = true;
-            this->gfx = std::make_shared<sdl::Graphics>(nullptr, op);
+            this->gfx = std::make_shared<gfx::Graphics>(nullptr, op);
             gfx->setScale(1, 1);
         }
         {   // 构造 Game 实例
             // 注入 Graphics: gfx 到 Game 实例中
             // 注入 KeyboardStats: keyboard_stats 到 Game
             auto inj = std::make_shared<di::DependencyInjector>();
-            inj->RegisterDependency<sdl::Graphics>(this->gfx);
+            inj->RegisterDependency<gfx::Graphics>(this->gfx);
             inj->RegisterDependency<input::KeyboardStats>(keyboard_stats);
             auto op = game::GameOptions();
             op.screen_size = {options.width, options.height};
@@ -58,7 +58,8 @@ namespace wf {
                 while (SDL_PollEvent(&event)) {
                     if (event.type == SDL_EVENT_QUIT)
                         this->options.isRunning = false;
-                    if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(this->gfx->getWindow()))
+                    //  && event.window.windowID == SDL_GetWindowID(this->gfx->getWindow()
+                    if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
                         this->options.isRunning = false;
                 }
 
