@@ -4,10 +4,10 @@
 #include <memory>
 #include <string>
 #include <WorldFinder/di/DependencyInjector.hpp>
-#include <WorldFinder/game/render/sdl.hpp>
+#include <WorldFinder/game/render/graphics.hpp>
 
 namespace wf::game::ecs {
-    using namespace game::render::sdl;
+    using namespace game::render::gfx;
     struct WorldOptions {
 
     };
