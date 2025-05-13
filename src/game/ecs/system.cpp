@@ -3,20 +3,34 @@
 #include <spdlog/spdlog.h>
 
 #include "WorldFinder/Input.hpp"
+#include "WorldFinder/game/scene/TileManager.hpp"
 
 namespace wf::game::ecs::system {
-    void AccelerateSystem(const flecs::entity& e, Velocity& vel, ContinuousAcceleration& c_acc, ImpulseAcceleration& i_acc) {
-        // const Acceleration acc = {c_acc.x + i_acc.x, c_acc.y + i_acc.y};
-        const Acceleration acc = {c_acc.x + i_acc.x, c_acc.y + i_acc.y};
+    void AccelerateSystem(const flecs::entity& e, Velocity& vel, ImpulseAcceleration& i_acc) {
+        const auto* c_acc = e.get<ContinuousAcceleration>();
+        Acceleration acc{};
+        if (c_acc) {
+            acc.x = c_acc->x + i_acc.x;
+            acc.y = c_acc->y + i_acc.y;
+            e.remove<ContinuousAcceleration>();
+        } else {
+            acc.x = i_acc.x;
+            acc.y = i_acc.y;
+        }
         if (vel.cur.x < vel.max.x) {
-            if (vel.cur.x + acc.x > vel.max.x) vel.cur.x = vel.max.x;
-            else vel.cur.x += acc.x;
+            if (vel.cur.x + acc.x > vel.max.x) {
+                vel.cur.x = vel.max.x;
+            } else {
+                vel.cur.x += acc.x;
+            }
         }
         if (vel.cur.y < vel.max.y) {
-            if (vel.cur.y + acc.y > vel.max.y) vel.cur.y = vel.max.y;
-            else vel.cur.y += acc.y;
+            if (vel.cur.y + acc.y > vel.max.y) {
+                vel.cur.y = vel.max.y;
+            } else {
+                vel.cur.y += acc.y;
+            }
         }
-        i_acc = {0, 0};
     }
 
     void DragSystem(Velocity& vel, const Drag& drag) {
@@ -36,6 +50,11 @@ namespace wf::game::ecs::system {
         // auto* graphics = static_cast<render::sdl::Graphics*>(e.world().get_ctx());
         const auto* injector = static_cast<di::DependencyInjector*>(e.world().get_ctx());
         const auto graphics = injector->GetDependency<render::gfx::Graphics>();
+        const auto tm = injector->GetDependency<game::scene::TileManager>();
+        const auto tiles = tm->query({0, 0}, {720*2, 480*2}); // TODO: qwq
+        for (const auto& tile : tiles) {
+            graphics->addRect({tile.pos.x, tile.pos.y}, {tile.size.x, tile.size.y}, {0, 0, 0, 255}, true, true);
+        }
         graphics->addRect({pos.x, pos.y}, {sprite.size.x, sprite.size.y}, {52, 78, 65, 255}, true, true);
         graphics->addRect({pos.x, pos.y}, {4, 4}, {255, 255, 0, 255}, true, true);
         // graphics->addText(std::format("ID: {}", e.name().c_str()), {pos.x-(sprite.size.x/2), pos.y-sprite.size.y-10});
@@ -48,15 +67,17 @@ namespace wf::game::ecs::system {
         const auto* injector = static_cast<di::DependencyInjector*>(e.world().get_ctx());
         const auto input = injector->GetDependency<input::KeyboardStats>();
 
-        if (input->is_pressed(input::key::W)) i_acc.y = -0.2f;
+        if (input->is_pressed(input::key::W)) i_acc.y = -0.4f;
         if (input->is_pressed(input::key::S)) i_acc.y = 0.2f;
         if (input->is_pressed(input::key::A)) i_acc.x = -0.2f;
         if (input->is_pressed(input::key::D)) i_acc.x = 0.2f;
     }
 
-    void GravitySystem(const Gravity& gra, const Mass& mass, ContinuousAcceleration& c_acc, const Position& pos) {
-        if (pos.y < 256) c_acc.y = mass.m * gra.g;
+    void GravitySystem(flecs::entity e, const Gravity& gra, const Mass& mass, const Position& pos) {
+        ContinuousAcceleration c_acc{};
+        if (pos.y < 256) c_acc.y = mass.m * gra.g, 0;
         else c_acc.y = 0;
+        e.set<ContinuousAcceleration>(c_acc);
     }
 
 }
