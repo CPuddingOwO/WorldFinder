@@ -25,9 +25,11 @@ namespace wf::game::ecs {
         //         .each([&](flecs::entity e, Position& pos) {
         //
         //         });
-        world->system<const Gravity, const Mass, ContinuousAcceleration, const Position>("GravitySystem").kind(flecs::OnUpdate).each(GravitySystem);
+        world->system<const Gravity, const Mass,const Position>("GravitySystem").kind(flecs::OnUpdate).each(GravitySystem);
         world->system<ImpulseAcceleration>("InputSystem").kind(flecs::OnUpdate).each(InputSystem);
-        world->system<Velocity, ContinuousAcceleration, ImpulseAcceleration>("AccelerationSystem").kind(flecs::OnUpdate).each(AccelerateSystem);
+//        world->system<Velocity, ContinuousAcceleration, ImpulseAcceleration>("AccelerationSystem").kind(flecs::OnUpdate).each(AccelerateSystem);
+        world->system<Velocity, ImpulseAcceleration>("AccelerationSystem").kind(flecs::OnUpdate).each(AccelerateSystem);
+
         world->system<Velocity, const Drag>("DragSystem").kind(flecs::OnUpdate).each(DragSystem);
         world->system<Position, Velocity>("MovementSystem").kind(flecs::OnUpdate).each(MovementSystem);
         world->system<const Position, const Sprite>("RenderSystem").kind(flecs::OnUpdate).each(RenderSystem);
