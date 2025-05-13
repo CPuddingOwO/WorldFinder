@@ -25,7 +25,7 @@ namespace wf::game::render::gfx {
         SDL_Quit();
     }
 
-    Graphics &Graphics::setVSync(bool isVsync) {
+    Graphics &Graphics::setVSync(const bool isVsync) {
         this->options.isVsync = isVsync;
         SDL_GL_SetSwapInterval( isVsync ? 1 : 0);
         return *this;
@@ -44,8 +44,13 @@ namespace wf::game::render::gfx {
         return *this;
     }
 
-    Graphics& Graphics::addRect(const glm::ivec2& pos, const glm::ivec2& size, const glm::ivec4& color, bool center_bottom, bool fill) {
-        this->drawlist->AddRect(pos, pos+size, color, {}, {});
+    Graphics& Graphics::addRect(const glm::ivec2& pos, const glm::ivec2& size, const glm::ivec4& color, bool fill, bool center_bottom) {
+        if (center_bottom) {
+            glm::ivec2 adjustedPos = {pos.x - size.x / 2, pos.y - size.y};
+            this->drawlist->AddRect(adjustedPos, adjustedPos + size, color, {}, {});
+        } else {
+            this->drawlist->AddRect(pos, pos + size, color, {}, {});
+        }
         return *this;
     }
 

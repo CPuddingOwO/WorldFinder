@@ -53,6 +53,9 @@ set(SRC_CODE
         src/game/render/drawlist.cpp
         inc/WorldFinder/game/render/types.hpp
         inc/WorldFinder/game/render/graphics.hpp
+        inc/WorldFinder/game/scene/Tiles.hpp
+        inc/WorldFinder/game/scene/TileManager.hpp
+        inc/WorldFinder/game/scene/QuadTree.hpp
 )
 
 list(APPEND ${CXX_MODULES}

@@ -23,7 +23,7 @@ int main([[maybe_unused]]int argc, [[maybe_unused]]char* argv[]) {
     injector->RegisterDependency<game::render::FpsManager>(fpsmanager);
 
     try {
-        auto app = std::make_unique<App>(injector, options);
+        const auto app = std::make_unique<App>(injector, options);
         app->run();
 
     }catch(const std::exception& e) {
