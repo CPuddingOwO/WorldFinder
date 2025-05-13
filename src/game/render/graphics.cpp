@@ -25,7 +25,7 @@ namespace wf::game::render::gfx {
         SDL_Quit();
     }
 
-    Graphics &Graphics::setVSync(bool isVsync) {
+    Graphics &Graphics::setVSync(const bool isVsync) {
         this->options.isVsync = isVsync;
         SDL_GL_SetSwapInterval( isVsync ? 1 : 0);
         return *this;
