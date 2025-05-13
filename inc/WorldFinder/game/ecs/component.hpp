@@ -40,4 +40,6 @@ namespace wf::game::ecs::component {
     struct Mass {
         double m;
     };
+
+    struct IsGrounded{};
 }
