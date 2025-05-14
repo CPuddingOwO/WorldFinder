@@ -37,8 +37,8 @@ jobs:
 
       - name: Install Conan
         run: |
-          pip install conan
-          conan --version
+          sudo pip install conan
+          sudo conan --version
 
       - name: Configure Conan
         run: |
@@ -109,7 +109,7 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          conan install .. --output-folder=. --build=missing -c tools.system.package_manager:mode=install -s compiler=clang -s compiler.version=20
+          conan install .. --output-folder=. --build=missing -c tools.system.package_manager:mode=install -s compiler=clang -s compiler.version=20 -s compiler.cppstd=20
 
       - name: Configure CMake
         run: |
