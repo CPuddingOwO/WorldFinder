@@ -1,9 +1,8 @@
-name: "Generate Gitmoji Changelog"
+name: "changelog"
 
 on:
-  push:
-    branches:
-      - "main"
+  pull_request:
+    branches: [ master ]
 
 jobs:
   generate-changelog:
