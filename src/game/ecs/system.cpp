@@ -46,10 +46,10 @@ void CollisionSystem(const flecs::entity &e, Position &pos, Velocity &vel) {
     const auto tm = injector->GetDependency<game::scene::TileManager>();
 
     // 假设实体有一个大小 (entitySize)
-    glm::vec2 entitySize = {32, 32};
+    const glm::vec2 entitySize = {32, 64};
 
     // 保存原始位置，用于计算位移
-    glm::vec2 originalPos = {pos.x, pos.y};
+    const glm::vec2 originalPos = {pos.x, pos.y};
 
     // 由于实体中心点在脚底中央，调整边界计算
     // 查询可能碰撞的瓦片 (扩大查询范围以确保捕获所有可能的碰撞)
@@ -58,24 +58,24 @@ void CollisionSystem(const flecs::entity &e, Position &pos, Velocity &vel) {
 
     for (const auto &tile: tiles) {
         // 计算实体和瓦片的边界 (调整为实体中心点在脚底中央)
-        float entityLeft = pos.x - entitySize.x / 2;
-        float entityRight = pos.x + entitySize.x / 2;
-        float entityTop = pos.y - entitySize.y; // 顶部边界从脚底向上entitySize.y
-        float entityBottom = pos.y;             // 底部边界就是pos.y位置
+        const double entityLeft = pos.x - entitySize.x / 2;
+        const double entityRight = pos.x + entitySize.x / 2;
+        const double entityTop = pos.y - entitySize.y; // 顶部边界从脚底向上entitySize.y
+        const double entityBottom = pos.y;             // 底部边界就是pos.y位置
 
-        float tileLeft = tile.pos.x;
-        float tileRight = tile.pos.x + tile.size.x;
-        float tileTop = tile.pos.y;
-        float tileBottom = tile.pos.y + tile.size.y;
+        const float tileLeft = tile.pos.x;
+        const float tileRight = tile.pos.x + tile.size.x;
+        const float tileTop = tile.pos.y;
+        const float tileBottom = tile.pos.y + tile.size.y;
 
         // 检查是否发生碰撞
-        bool collisionX = entityRight > tileLeft && entityLeft < tileRight;
-        bool collisionY = entityBottom > tileTop && entityTop < tileBottom;
+        const bool collisionX = entityRight > tileLeft && entityLeft < tileRight;
+        const bool collisionY = entityBottom > tileTop && entityTop < tileBottom;
 
         if (collisionX && collisionY) {
             // 计算碰撞的深度（在x和y方向）
-            float depthX = std::min(entityRight - tileLeft, tileRight - entityLeft);
-            float depthY = std::min(entityBottom - tileTop, tileBottom - entityTop);
+            const double depthX = std::min(entityRight - tileLeft, tileRight - entityLeft);
+            const double depthY = std::min(entityBottom - tileTop, tileBottom - entityTop);
 
             // 确定碰撞的主要方向并仅在该方向应用反弹
             if (depthX < depthY) {
@@ -83,22 +83,22 @@ void CollisionSystem(const flecs::entity &e, Position &pos, Velocity &vel) {
                 if (originalPos.x < tile.pos.x + tile.size.x / 2) {
                     // 从左边碰撞
                     pos.x = tileLeft - entitySize.x / 2 - 0.01f; // 轻微偏移防止粘在墙上
-                    if (vel.cur.x > 0) vel.cur.x = -vel.cur.x * 0.5f; // 向左反弹，减小速度
+                    if (vel.cur.x > 0) vel.cur.x = -vel.cur.x * 0.3f; // 向左反弹，减小速度
                 } else {
                     // 从右边碰撞
                     pos.x = tileRight + entitySize.x / 2 + 0.01f;
-                    if (vel.cur.x < 0) vel.cur.x = -vel.cur.x * 0.5f; // 向右反弹，减小速度
+                    if (vel.cur.x < 0) vel.cur.x = -vel.cur.x * 0.3f; // 向右反弹，减小速度
                 }
             } else {
                 // 垂直方向的碰撞 - 确定是上边还是下边
                 if (originalPos.y - entitySize.y/2 < tile.pos.y + tile.size.y / 2) {
                     // 从上方碰撞
-                    pos.y = tileTop - entitySize.y + 0.01f; // 注意这里的调整
-                    if (vel.cur.y > 0) vel.cur.y = -vel.cur.y * 0.5f; // 向上反弹，减小速度
+                    // pos.y = tileTop - entitySize.y + 0.01f; // 注意这里的调整
+                    if (vel.cur.y > 0) vel.cur.y = -vel.cur.y * 0.3f; // 向上反弹，减小速度
                 } else {
                     // 从下方碰撞
-                    pos.y = tileBottom + 0.01f; // 注意这里的调整
-                    if (vel.cur.y < 0) vel.cur.y = -vel.cur.y * 0.5f; // 向下反弹，减小速度
+                    // pos.y = tileBottom + 0.01f; // 注意这里的调整
+                    if (vel.cur.y < 0) vel.cur.y = -vel.cur.y * 0.3f; // 向下反弹，减小速度
                 }
             }
 
@@ -144,17 +144,11 @@ void CollisionSystem(const flecs::entity &e, Position &pos, Velocity &vel) {
         i_acc.y += acc.y;
     }
 
-    // void GravitySystem(const flecs::entity e, const Gravity& gra, const Mass& mass, const Position& pos) {
-        // ContinuousAcceleration c_acc{};
-        // if (pos.y < 480*2) c_acc.y = mass.m * gra.g, 0;
-        // else c_acc.y = 0;
-        // e.set<ContinuousAcceleration>(c_acc);
-    // }
     void GravitySystem(const flecs::entity e, const Gravity& gra, const Mass& mass, Position& pos, Velocity& vel) {
         // 创建一个常量表示地面高度
         const auto injector = static_cast<di::DependencyInjector*>(e.world().get_ctx());
         const auto tm = injector->GetDependency<game::scene::TileManager>();
-        const auto tiles = tm->query({pos.x, pos.y}, {2, 64});
+        const auto tiles = tm->query({pos.x, pos.y}, {1, 16});
         float GROUND_LEVEL = 480*2;
         if (!tiles.empty()) {
             GROUND_LEVEL = tiles[0].pos.y;
