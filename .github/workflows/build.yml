@@ -48,7 +48,7 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          conan install .. --output-folder=. --build=missing -s compiler=clang -s compiler.version=20 -s compiler.libcxx=libstdc++11
+          conan install .. --output-folder=. --build=missing -s compiler=clang -s compiler.version=20 -s compiler.cppstd=20 -s build_type=Release
 
       - name: Configure CMake
         run: |
@@ -82,7 +82,7 @@ jobs:
 
       - name: Install LLVM and Clang
         run: |
-          choco install llvm --version=20.0.0 -y
+          choco install llvm --version=20.1.4 -y
 
       - name: Set up environment variables
         shell: bash
